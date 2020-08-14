@@ -7,6 +7,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -19,6 +21,9 @@ public class MailService {
 
     @Autowired
     private JavaMailSender emailSender;
+
+    @Autowired
+    private TemplateEngine templateEngine;
 
     public void sendMail(MailRequest mailRequest) throws MessagingException {
 
@@ -48,6 +53,21 @@ public class MailService {
             emailSender.send(simpleMailMessage);
         }
 
+    }
+
+    public void sendHTMLMail(MailRequest mailRequest) throws MessagingException {
+        MimeMessage mail = emailSender.createMimeMessage();
+        Context context = new Context();
+        context.setVariable("body", mailRequest.getText());
+        String body = templateEngine.process("mailTemplate.html", context);
+        MimeMessageHelper helper = new MimeMessageHelper(mail, true);
+
+        helper.setTo(mailRequest.getTo());
+        helper.setCc(mailRequest.getCc());
+        helper.setBcc(mailRequest.getBcc());
+        helper.setSubject(mailRequest.getSubject());
+        helper.setText(body, true);
+        emailSender.send(mail);
     }
 
 }

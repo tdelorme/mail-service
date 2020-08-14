@@ -34,4 +34,16 @@ public class MailController {
 
     }
 
+    @PostMapping("/send/html")
+    public ResponseEntity<Boolean> sendHtml(@RequestBody MailRequest mailRequest) {
+        try {
+            mailService.sendHTMLMail(mailRequest);
+            return ResponseEntity.ok(true);
+        } catch (MessagingException e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.badRequest().body(false);
+        }
+    }
+
+
 }
